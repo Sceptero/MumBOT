@@ -1,7 +1,10 @@
 "use strict";
+var cfg = require('./config.js');
 
 var mumble = require('mumble');
 var fs = require('fs');
+
+
 
 var options = {};
 try {
@@ -37,7 +40,7 @@ for (var i = 0; i < files.length; i++) {
 }
 
 console.log( 'Connecting' );
-mumble.connect( 'mumble://pexu.tk', options, function ( error, connection ) {
+mumble.connect( cfg['serverURL'], options, function ( error, connection ) {
     if(error) { throw new Error(error); }
     console.log('Connected');
     connection.on('ready', function() {
@@ -77,5 +80,5 @@ mumble.connect( 'mumble://pexu.tk', options, function ( error, connection ) {
         }
     });
 
-    connection.authenticate('MumBOT');
+    connection.authenticate(cfg['botName']);
 });
