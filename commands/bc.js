@@ -11,7 +11,7 @@ function broadcastRecursivly(channel, message) {
 module.exports = {
         command: /!bc (.*)/,
         action: function( context, message ) {
-            message = '<b><span style="color:#05ff61; font-size:15px">[SERVER BROADCAST] ' + message + '</span></b>'
+            message = '<b><span style="color:#05ff61; font-size:15px">[SERVER BROADCAST]</span><span style="font-size:15px"> ' + message + '</span></b>'
             broadcastRecursivly(context.connection.rootChannel, message);
         }
 };
