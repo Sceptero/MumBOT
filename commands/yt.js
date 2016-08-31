@@ -23,7 +23,10 @@ module.exports = {
                 }
 
                 if (action==="play") { // play
-                    var dl = ytdl(url);
+                    var dl = ytdl(url)
+                        .on('info', function(info, format) {
+                            context.connection.user.channel.sendMessage("[YT PLAYER] Now playing: " + info["title"]);
+                        });
                     converter = ffmpeg(dl).setFfmpegPath('D:/dev/libs/ffmpeg/bin/ffmpeg.exe').format('mp3').pipe(new lame.Decoder())
                         .on('format', function(format) {
                             playing = true;
