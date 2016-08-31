@@ -56,7 +56,7 @@ mumble.connect( 'mumble://pexu.tk', options, function ( error, connection ) {
     
     // Welcome message
     connection.on('user-connect', function(user) {
-        console.log("User " + user.name + " connected");
+        user.sendMessage('Welcome, ' + user.name + '!');
     });
     
     // Handle commands
