@@ -16,7 +16,6 @@ try {
 }
 
 var tree = "";
-
 function buildChannelTree(channel, level) {
     for(var i = 0; i < level; i++) {
         tree += "   ";
@@ -31,6 +30,14 @@ function buildChannelTree(channel, level) {
         buildChannelTree(channel.children[c], level + 1);
     }
 }
+
+var commands = [];
+var files = fs.readdirSync( "./commands");
+for (var i = 0; i < files.length; i++) {
+    commands.push(require('./commands/' + files[i]));
+}
+
+console.log(commands);
 
 console.log( 'Connecting' );
 mumble.connect( 'mumble://pexu.tk', options, function ( error, connection ) {
@@ -49,144 +56,29 @@ mumble.connect( 'mumble://pexu.tk', options, function ( error, connection ) {
         }
         console.log("\nThose were all users!");
     });
-    connection.on('channel-move', function(channel, from, to) {
-        console.log("Channel " + channel.name + " was moved from " + from.name + " to " + to.name );
-    });
-    connection.on('channel-links-add', function(channel, links) {
-        for(var key in links) {
-            console.log("Channel " + links[key].name + " was linked to " + channel.name);
-        }
-    });
-    connection.on('channel-links-remove', function(channel, links) {
-        for(var key in links) {
-            console.log("Channel " + links[key].name + " was unlinked from " + channel.name);
-        }
-    });
-    connection.on('channel-rename', function(channel, oldName, newName) {
-        console.log("Channel " + oldName + " was renamed to " + newName);
-    });
-    connection.on('user-mute', function(user, muted, actor) {
-        console.log("User " + user.name + " changed mute to: " + muted + " by " + actor.name );
-    });
-    connection.on('user-self-deaf', function(user, deaf, actor) {
-        console.log("User " + user.name + " changed deaf to: " + deaf + " by " + actor.name );
-    });
-    connection.on('user-self-mute', function(user, muted, actor) {
-        console.log("User " + user.name + " changed self-mute to: " + muted + " by " + actor.name );
-    });
-    connection.on('user-suppress', function(user, suppress, actor) {
-        console.log("User " + user.name + " changed suppress to: " + suppress + " by " + actor.name );
-    });
-    connection.on('user-move', function(user, fromChannel, toChannel, actor) {
-        console.log("User " + user.name + " moved from channel " + fromChannel.name + " to " + toChannel.name + " by " + actor.name );
-    });
-    connection.on('user-recording', function( user, state , actor) {
-        console.log("User " + user.name + ( state ? ' started' : ' stopped' ) + " recording"  + " by " + actor.name );
-    });
-    connection.on('user-disconnect', function(user) {
-        console.log("User " + user.name + " disconnected");
-    });
+    
+    // Welcome message
     connection.on('user-connect', function(user) {
         console.log("User " + user.name + " connected");
     });
-    connection.on('channel-create', function(channel) {
-        console.log("Channel " + channel.name + " created");
-    });
-    connection.on('channel-remove', function(channel) {
-        console.log("Channel " + channel.name + " removed");
-    });
+    
+    // Handle commands
     connection.on('message', function(message, actor) {
-        if( handleCommand( message, actor, connection ) ) {
+        for (var i = 0; i < commands.length; i++) {
+            var cmd = commands[i];
+            
+            var match = cmd.command.exec( message );
+            if( !match ) {
+                continue;
+            }
+
+            var params = match.slice(1);
+            params.unshift({ message: message, actor: actor, connection: connection });
+            cmd.action.apply( null, params );
+
             return;
         }
+    });
 
-        actor.sendMessage("I received: '" + message + "'");
-        connection.user.channel.sendMessage("I received: '" + message + "'");
-    });
-    connection.on('voice-start', function( user ) {
-        console.log( 'User ' + user.name + ' started voice transmission' );
-    });
-    connection.on('voice-end', function( user ) {
-        console.log( 'User ' + user.name + ' ended voice transmission' );
-    });
     connection.authenticate('MumBOT');
 });
-
-var commands = [
-    {
-        command: /!channel permissions: (.*)/,
-        action: function( context, channelName ) {
-            var channel = context.connection.channelByName( channelName );
-            if( !channel ) {
-                return context.actor.sendMessage( 'Unknown channel: ' + channelName );
-            }
-
-            channel.getPermissions( function( err, permissions ) {
-                if( err ) { return context.actor.sendMessage( 'Error: ' + err ); }
-                context.actor.sendMessage( channelName + ' permissions: ' + JSON.stringify( permissions ) );
-            });
-        }
-    },
-    {
-        command: /!msg ([^:]+): (.*)/,
-        action: function( context, names, message ) {
-
-            names = names.split( ',' );
-            for( var n in names ) {
-                var name = names[n];
-
-                var user = context.connection.userByName( name );
-                if( user ) {
-                    user.sendMessage(message);
-                }
-
-                var channel = context.connection.channelByName( name );
-                if( channel ) {
-                    channel.sendMessage(message);
-                }
-            }
-        }
-    },
-    {
-        command: /!create ([^.]+)\.(.*)/,
-        action: function( context, parent, name ) {
-
-            var parent = context.connection.channelByName( parent );
-            parent.addSubChannel( name );
-        }
-    },
-    {
-        command: /!remove (.+)/,
-        action: function( context, name ) {
-
-            var channel = context.connection.channelByName( name );
-            channel.remove();
-        }
-    },
-
-    {
-        command: /!join (.+)/,
-        action: function( context, name ) {
-
-            var channel = context.connection.channelByPath( name );
-            channel.join();
-        }
-    },
-];
-
-var handleCommand = function( message, actor, connection ) {
-    for( var c in commands ) {
-        var cmd = commands[c];
-
-        var match = cmd.command.exec( message );
-        if( !match ) {
-            continue;
-        }
-
-        var params = match.slice(1);
-        params.unshift({ message: message, actor: actor, connection: connection });
-        cmd.action.apply( null, params );
-
-        return true;
-    }
-};
