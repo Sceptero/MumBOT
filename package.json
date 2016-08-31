@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "fluent-ffmpeg": "^2.1.0",
     "lame": "^1.2.4",
     "mumble": "^0.3.10",
     "ytdl-core": "^0.7.17"
