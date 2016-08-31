@@ -1,4 +1,3 @@
-
 "use strict";
 
 var mumble = require('mumble');
@@ -37,8 +36,6 @@ for (var i = 0; i < files.length; i++) {
     commands.push(require('./commands/' + files[i]));
 }
 
-console.log(commands);
-
 console.log( 'Connecting' );
 mumble.connect( 'mumble://pexu.tk', options, function ( error, connection ) {
     if(error) { throw new Error(error); }
@@ -66,12 +63,12 @@ mumble.connect( 'mumble://pexu.tk', options, function ( error, connection ) {
     connection.on('message', function(message, actor) {
         for (var i = 0; i < commands.length; i++) {
             var cmd = commands[i];
-            
+
             var match = cmd.command.exec( message );
             if( !match ) {
                 continue;
             }
-
+            
             var params = match.slice(1);
             params.unshift({ message: message, actor: actor, connection: connection });
             cmd.action.apply( null, params );

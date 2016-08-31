@@ -1,7 +1,7 @@
 // TODO
 
 module.exports = {
-        command: "test 2",
+        command: /x{50}/,
         action: function() {
             console.log('executing action 2');
         }
