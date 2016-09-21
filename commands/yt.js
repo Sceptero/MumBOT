@@ -10,10 +10,16 @@ var ytnode = require('youtube-node');
 
 
 
-var playing = false, converter, vol = cfg['volume'], title;
+var playing = false,
+    converter, vol = cfg['volume'],
+    title;
 
 function playYT(context, param) {
-    var dl = ytdl(param, { filter: function(format) { return format.container == "mp4"; }})
+    var dl = ytdl(param, {
+            filter: function(format) {
+                return format.container == "mp4";
+            }
+        })
         .on('info', function(info, format) {
             title = info["title"];
             context.connection.user.channel.sendMessage("[YT PLAYER] Now playing: " + title);
@@ -22,7 +28,7 @@ function playYT(context, param) {
     converter = ffmpeg(dl).setFfmpegPath(cfg['ffmpegLocation']).format('mp3').pipe(new lame.Decoder())
         .on('format', function(format) {
             playing = true;
-                            
+
             this.pipe(context.connection.inputStream({
                 channels: format.channels,
                 sampleRate: format.sampleRate,
@@ -31,54 +37,57 @@ function playYT(context, param) {
         })
         .on('finish', function() {
             playing = false;
-            converter.unpipe();                    
+            converter.unpipe();
         });
 }
 
 module.exports = {
-        command: /!yt (play |stop|vol |find |info)(.*)/,
-        action: function(context, action, param) {
-            action = action.trim();
-            param = param.trim().replace(/<(?:.|\n)*?>/gm, '');
+    command: /^!yt (play |stop|vol |info)(.*)/,
+    action: function(context, action, param) {
+        action = action.trim();
+        param = param.trim().replace(/<(?:.|\n)*?>/gm, ''); // trim & strip html tags
 
-                // change volume
-                if (action==="vol") {
-                    vol = Number(param);
-                    return;
-                }
-
-                if (action==="info") {
-                    if (playing)
-                        context.connection.user.channel.sendMessage("[YT PLAYER] Now playing: " + title);
-                    return;
-                }
-
-                // find song by name
-                if (action==="find") {
-                    var yt = new ytnode();
-                    yt.setKey(cfg['googleAPIKey']);
-                    yt.addParam('type', 'video');
-                    yt.search(param, 1, function(er, res) {
-                        if (er || !res.items[0]) {
-                            console.error(er);
-                            return;
-                        }
-                        else {
-                            param = 'https://www.youtube.com/watch?v=' + res.items[0].id.videoId;
-                            playYT(context,param);
-                        }
-                    });
-                }
-
-                // stop previous song if already playing
-                if (playing) {
-                    playing = false;
-                    converter.unpipe();
-                }
-
-                // play song by url
-                if (action==="play") { // play
-                    playYT(context,param);
-                } 
+        // change volume
+        if (action === "vol") {
+            vol = Number(param);
+            return;
         }
+
+        if (action === "info") {
+            if (playing)
+                context.connection.user.channel.sendMessage("[YT PLAYER] Now playing: " + title);
+            return;
+        }
+
+        // play song
+        if (action === "play") {
+            // check if provided param is url or song name
+            var reURL = /^(https?:\/\/)?(www\.)?youtu(be\.com\/watch\?|\.be\/).+/; // (youtube.com/watch? || youtu.be/) domains check
+            var matchURL = reURL.exec(param.toLowerCase())
+            if (matchURL) { // url provided
+                playYT(context, param);
+            } else { // search term provided
+                var yt = new ytnode();
+                yt.setKey(cfg['googleAPIKey']);
+                yt.addParam('type', 'video');
+                yt.search(param, 1, function(er, res) {
+                    if (er || !res.items[0]) {
+                        console.error(er);
+                        return;
+                    } else {
+                        param = 'https://www.youtube.com/watch?v=' + res.items[0].id.videoId;
+                        playYT(context, param);
+                    }
+                });
+            }
+
+
+        }
+
+        // stop previous song if already playing
+        if (playing) {
+            playing = false;
+            converter.unpipe();
+        }
+    }
 };
