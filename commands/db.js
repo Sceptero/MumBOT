@@ -23,13 +23,9 @@ module.exports = {
         // db.remove({}, { multi: true });
 
         db.find({}, function(err,docs) {
-            console.log('hello?');
             for (var i = 0; i < docs.length; i++) {
-                console.log('hello?');
                 var doc = docs[i];
-                
                 console.log(doc);
-
             }
         });
 
