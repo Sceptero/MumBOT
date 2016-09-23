@@ -7,9 +7,9 @@ module.exports = {
         var db = context.db;
 
         db.find({}).sort({
-            credits: 1
+            credits: -1
         }).limit(5).exec(function(err, docs) {
-            var msg = 'Users with the most credits:';
+            var msg = 'Richest users:';
 
             for (var i = 0; i < docs.length; i++) {
                 var doc = docs[i];
