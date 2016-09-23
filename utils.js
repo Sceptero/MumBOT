@@ -1,3 +1,16 @@
+// Utils
+
+function traverseRecursively(channel, list) {
+    for (var i = 0; i < channel.users.length; i++) {
+        var user = channel.users[i];
+        if (user.id != null) list.push(user);
+    }
+
+    for (var i = 0; i < channel.children.length; i++) {
+        traverseRecursively(channel.children[i], list);
+    }
+}
+
 module.exports = {
 
     // formats array of mumble comment lines
@@ -11,5 +24,11 @@ module.exports = {
         }
         formatted += '<pre style=" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style="font-family:\'Courier New,courier\'"></span></pre>';
         return formatted;
+    },
+
+    registeredUsersOnline: function(connection) {
+        var list = [];
+        traverseRecursively(connection.rootChannel, list);
+        return list;
     }
 };

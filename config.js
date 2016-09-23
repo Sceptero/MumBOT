@@ -1,7 +1,7 @@
 module.exports = {
     // Name of the bot
     'botName': 'MumBOT2',
-    // Location on ffmpeg executable
+    // Location of ffmpeg executable
     'ffmpegLocation': './ffmpeg/ffmpeg.exe',
     // Google API Data Key
     'googleAPIKey': 'AIzaSyCIUG_fUAKDgXw6mn5MupsimKJwg0wFKG8',
