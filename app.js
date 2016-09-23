@@ -132,12 +132,15 @@ mumble.connect(cfg['serverURL'], options, function(error, connection) {
         '║               MumBOT                ║',
         '╚═════════════════════════════════════╝',
         ' ',
-        ' Komendy:',
+        ' Commands:',
         ' ',
         '  !yt [play/stop/info]',
-        '  !msg users,divided,by,commas: msg',
-        '  !bc msg',
-        '  !roll'
+        '  !msg <i>users,divided,by,commas</i>: <i>msg</i>',
+        '  !bc <i>msg</i>',
+        '  !roll',
+        '  !credits',
+        '  !top',
+        '  !gamble <i>credits</i>'
     ]
 
     connection.connection.sendMessage('UserState', {

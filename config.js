@@ -10,5 +10,7 @@ module.exports = {
     // default volume
     'volume': 0.1,
     // name of database
-    'dbFileName': 'db'
+    'dbFileName': 'db',
+    // credits per minute
+    'cpm': 5
 }

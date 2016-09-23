@@ -1,7 +1,5 @@
 // check number of your credits
 
-var cfg = require('../config.js');
-
 module.exports = {
     command: /^!credits/,
     action: function(context) {
@@ -19,6 +17,7 @@ module.exports = {
             if (doc == null) {
                 db.insert({
                     id: context.actor.id,
+                    name: context.actor.name,
                     credits: 0
                 })
                 context.actor.sendMessage('You have 0 credits.');
