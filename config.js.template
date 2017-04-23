@@ -1,0 +1,16 @@
+module.exports = {
+    // Name of the bot
+    'botName': 'MumBOT',
+    // Location of ffmpeg executable
+    'ffmpegLocation': './ffmpeg/ffmpeg.exe',
+    // Google API Data Key
+    'googleAPIKey': ' YOUR_API_KEY_HERE ',
+    // URL of server to connect to (mumble://example-server-address.com)
+    'serverURL': 'mumble://localhost',
+    // default volume
+    'volume': 0.1,
+    // name of database
+    'dbFileName': 'db',
+    // credits per minute
+    'cpm': 5
+}

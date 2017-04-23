@@ -4,3 +4,4 @@
 node_modules
 ffmpeg
 db
+config.js
